@@ -1,8 +1,8 @@
-defmodule CustomRpi4.MixProject do
+defmodule AdiRpi4.MixProject do
   use Mix.Project
 
-  @github_organization "vpsinc"
-  @app :custom_rpi4
+  @github_organization "catodigital"
+  @app :adi_rpi4
   @source_url "https://github.com/#{@github_organization}/#{@app}"
   @version Path.join(__DIR__, "VERSION")
            |> File.read!()
