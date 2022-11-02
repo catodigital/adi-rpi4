@@ -1,0 +1,58 @@
+properties([pipelineTriggers([githubPush()])])
+
+
+pipeline {
+  agent { label 'template' }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+    disableConcurrentBuilds()
+  }
+  environment {
+    //BUILD_VERSION = VersionNumber(
+     //     versionNumberString: '${BUILD_DATE_FORMATTED,"YYMMdd"}.${BUILDS_TODAY,"+4"}',
+    //      worstResultForIncrement: 'FAILURE',
+     //     projectStartDate: '1970-01-01'
+      //  )
+  }
+  stages {
+    stage ('Test') {
+      when { changeRequest target: 'master' }
+      steps {
+        script {
+          sh """
+             docker-compose -f docker/deploy/docker-compose.yml build
+             """
+        }
+      }
+    }
+    //  post {
+    //    failure {
+    //      slackSend(channel: "${SLACK_CHANNEL}",
+    //                message: "${env.JOB_NAME} ${env.SLACK_BRANCH} <${env.BUILD_URL}/console|FAILED!>",
+    //                color: "#C73535")
+    //    }
+    //  }
+
+    //stage ('Deploy') {
+    //  steps {
+    //    script {
+    //      sh """
+    //         docker-compose -f docker/deploy/docker-compose.yml run --rm s3push
+    //         """
+    //    }
+    //  }
+    //  post {
+    //    failure {
+    //      slackSend(channel: "${SLACK_CHANNEL}",
+    //                message: "${env.JOB_NAME} ${env.SLACK_BRANCH} <${env.BUILD_URL}/console|FAILED!>",
+    //                color: "#C73535")
+    //    }
+    //    success {
+    //      slackSend(channel: "${SLACK_CHANNEL}",
+    //                message: "${env.JOB_NAME} ${env.SLACK_BRANCH} <${env.BUILD_URL}/console|SUCCESS!>",
+    //                color: "#11cc00")
+    //    }
+    //  }
+    //}
+  }
+}

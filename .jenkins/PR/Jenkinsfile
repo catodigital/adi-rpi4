@@ -1,0 +1,49 @@
+properties([pipelineTriggers([githubPush()])])
+
+pipeline {
+  agent none
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: "5"))
+    disableConcurrentBuilds()
+  }
+  environment {
+    CHUMAK_CURVE_LIB = "enacl"
+  }
+  stages {
+    stage ("Test") {
+      agent {
+        node {
+          label "firmware"
+          customWorkspace "adi-rpi4-PR"
+        }
+      }
+      when {
+        allOf {
+          not { branch "master" };
+          changeRequest()
+        }
+      }
+      // setting this now means mix compile will compile for the proper environ
+      environment {
+        MIX_ENV = "test"
+      }
+      steps {
+        script {
+          sh ".jenkins/sync-artifacts.sh PR restore"
+        }
+        script {
+          sh """
+             cd src
+             mix do deps.get, compile, ecto.reset, cmd mix test --trace
+             """
+             //mix do deps.get, compile, ecto.reset, cmd mix coveralls --trace
+        }
+        archiveArtifacts artifacts: 'src/_build/test/lib/**/*-junit-report.xml', fingerprint: true
+        script {
+          sh ".jenkins/sync-artifacts.sh PR archive &"
+        }
+      }
+    }
+  }
+}
