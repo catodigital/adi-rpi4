@@ -24,6 +24,8 @@ mkShell {
     libsodium
     mix2nix
     ncurses
+    perl
+    perlPackages.ExtUtilsMakeMaker
     pkg-config-unwrapped
     rebar3
     rsync
