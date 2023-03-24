@@ -26,6 +26,7 @@ mkShell {
     ncurses
     pkg-config-unwrapped
     rebar3
+    rsync
     squashfsTools
     wget
     which
