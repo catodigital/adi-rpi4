@@ -1,0 +1,40 @@
+properties([pipelineTriggers([githubPush()])])
+
+pipeline {
+  agent none
+  options {
+    buildDiscarder(logRotator(numToKeepStr: "5"))
+    disableConcurrentBuilds()
+  }
+  environment {
+    CHUMAK_CURVE_LIB = "enacl"
+  }
+  stages {
+    stage ("Build Image") {
+      agent {
+        node {
+          label "firmware"
+          customWorkspace 'adi-rpi4-master'
+        }
+      }
+      when {
+        branch "master"
+      }
+      environment {
+          MIX_ENV = "prod"
+      }
+      steps {
+        script {
+          sh ".jenkins/sync-artifacts.sh master restore"
+        script {
+          sh """
+             mix nerves.artifact --path _build/prod
+             """
+        }
+        script {
+          sh ".jenkins/sync-artifacts.sh master archive &"
+        }
+      }
+    }
+  }
+}
